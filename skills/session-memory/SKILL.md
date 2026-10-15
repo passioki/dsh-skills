@@ -17,6 +17,37 @@ description: 把长对话整理成"可核查的设计规格书"。按时间分�
 | `docs/DESIGN-SPEC-PROGRESS.md` | ★ **覆盖台账**：47 段（每 2h）读到哪了 |
 | `docs/SESSION-INDEX.md` | ★ **分类索引**：每条对话的**标签**（多标签交集）+ 处置状态 |
 
+## ★★★ 配置（★ 通用化的唯一入口 —— 换项目只改这里，**不改本文件、不改脚本**）
+
+> ★ 上表和下文的 `docs/DESIGN-SPEC.md` 之类**全都是【默认值】**。
+
+**覆盖方式（三选一，优先级从高到低）：**
+
+| 方式 | 怎么写 | 适合 |
+|---|---|---|
+| **命令行** | `--config <cfg.json>` · `--tags <tags.json>` | 一次性 / 多项目并存 |
+| ★ **配置文件**（推荐） | 当前目录放 `session-memory.config.json` | 一个项目固定一套 |
+| **环境变量** | `SESSION_MEMORY_SPEC` 等（键名大写） | CI / 临时覆盖 |
+
+**可配的键（全部可选；不写就用默认值）：**
+
+| 键 | 默认值 | 含义 |
+|---|---|---|
+| `docs_dir` | `docs` | 文档放在哪个目录 |
+| `spec` | `DESIGN-SPEC.md` | 主体规格书名 |
+| `progress` | `DESIGN-SPEC-PROGRESS.md` | 覆盖台账名 |
+| `index` | `SESSION-INDEX.md` | 分类索引名 |
+| `ledger` | `PENDING-LEDGER.md` | 未完成台账名 |
+| `input` | `_both.txt` | `extract.py` 导出的对话文本（`seg.ps1` 会读它） |
+| `tags` | （空 = 用内置表） | 分类关键词表 JSON：`{"标签": ["关键词", …], …}` |
+
+```json
+// session-memory.config.json 示例
+{ "docs_dir": "docs", "spec": "MY-SPEC.md", "index": "IDX.md", "input": "conv.txt" }
+```
+
+★ **默认值 = 本技能的历史默认** ⇒ ★ **老项目零配置，行为一个字不变**。
+
 ## ★★ 五条铁律（违反即返工）
 
 1. **用户的话 = 规格**，不是建议。★ 不许降级成"打补丁"。
@@ -104,7 +135,7 @@ description: 把长对话整理成"可核查的设计规格书"。按时间分�
 **规则（★ 每条回复都必须有）：**
 
 ```
-★ 台账文件：`docs/PENDING-LEDGER.md`
+★ 台账文件：`docs/PENDING-LEDGER.md`（★ **默认名**；可用配置键 `ledger` 覆盖）
 ★ 每条回复【必须】：
    ① 先【更新】台账文件（状态变了就改）
    ② 并把【台账全表】贴进回复（★ 可用紧凑表格，但每条都要在）
@@ -194,13 +225,15 @@ description: 把长对话整理成"可核查的设计规格书"。按时间分�
 
 | 脚本 | 用途 |
 |---|---|
+| `scripts/_conf.py` | ★ **配置解析**（`session-memory.config.json` / `--config` / 环境变量）—— 别的脚本都 import 它 |
 | `scripts/extract.py` | 从 `session.v4.jsonl` 导出**双向**纯文本（USER/ASST + 真实时间戳） |
-| `scripts/seg.ps1` | 取**指定时间段**的完整对话（含正文，不止首行） |
-| `scripts/index_gen.py` | 生成 `SESSION-INDEX.md`（分类 + 处置） |
-| `scripts/prog_gen.py` | 生成 `DESIGN-SPEC-PROGRESS.md`（分段覆盖表） |
+| `scripts/seg.ps1` | 取**指定时间段**的完整对话（含正文，不止首行）。★ **纯 ASCII**（PS 5.1 读无 BOM 的 UTF-8 会按 GBK 解码 ⇒ 中文字面量会破坏解析） |
+| `scripts/index_gen.py` | 生成「分类索引」文档（★ 表名可配；关键词表 `--tags` 可覆盖） |
+| `scripts/prog_gen.py` | 生成「覆盖台账」文档（★ 正文引用的文档名走 `_conf`） |
 
 ★ 会话导出文件由用户提供（`dsh-session-*.zip` ⇒ 解压得 `session.v4.jsonl`）。
 ★ **时区**：jsonl 里 `time` 是 **UTC 毫秒**；本机 UTC+8 ⇒ **换算后才是真实时间**。
+★ **`seg.ps1` 找输入的顺序**（★ 绝不猜）：`-File` ⇒ 配置的 `input` ⇒ 当前目录 `_both.txt`；都没有就**响亮报错**。
 
 ## ★★ 何时用本 skill
 

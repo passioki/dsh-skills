@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
-"""生成 DESIGN-SPEC-PROGRESS.md（分段覆盖台账）。
+"""生成「覆盖台账」文档（按时间分段，逐段标状态）。
 
 用法:
-    python prog_gen.py <_both.txt> <输出 DESIGN-SPEC-PROGRESS.md>
+    python prog_gen.py <_both.txt> <输出文件> [--config <cfg.json>]
+
+★ 通用化：输出文件名**由你给**（第 2 个参数）；正文里引用的文档名走 `_conf.py`
+  （默认 `DESIGN-SPEC.md` / `SESSION-INDEX.md`，★ 可用 `session-memory.config.json` 覆盖）。
 
 ★ 按【每 2 小时】切成段，逐段标状态（⬜未读 / 🔄进行中 / ✅已读）。
 ★ 每轮读完一段，把该段的 `⬜ 未读 | —` 改成 `✅ 已读 | 进文档 §x`。
 """
-import io
 import re
 import sys
 from collections import OrderedDict
 from pathlib import Path
+
+import _conf
 
 HEAD = """# 设计规格书 · **覆盖台账**（可核查）
 
@@ -31,10 +35,13 @@ HEAD = """# 设计规格书 · **覆盖台账**（可核查）
 
 
 def main():
-    if len(sys.argv) < 3:
+    conf, argv = _conf.load()
+    if len(argv) < 2:
         print(__doc__)
         return 1
-    src, dst = Path(sys.argv[1]), Path(sys.argv[2])
+    src, dst = Path(argv[0]), Path(argv[1])
+    index_name = conf['index']
+    spec_name = conf['spec']
     lines = src.read_text(encoding='utf-8', errors='replace').split('\n')
 
     ent, who, t, buf = [], None, None, []
@@ -82,7 +89,7 @@ def main():
                        % (idx, day, key.split(' ')[1], u, len(ws) - u))
 
     out += ['', '## 主题索引（按分类查）', '',
-            '★ 每条对话的分类标签见：★ [`SESSION-INDEX.md`](SESSION-INDEX.md)',
+            '★ 每条对话的分类标签见：★ [`%s`](%s)' % (index_name, index_name),
             '',
             '| 主题 | 筛什么标签 |', '|---|---|',
             '| 调度（执行顺序/播放头/队列/暂停）| `调度` |',
@@ -94,7 +101,7 @@ def main():
             '| 文档与台账 | `文档` |', '',
             '## 已读发现', '',
             '★ 每读完一段，在这里追加"设计点"，★ 并按主题分组。',
-            '★ 同时把要点**写进 `DESIGN-SPEC.md`**（边读边写）。', '']
+            '★ 同时把要点**写进 `%s`**（边读边写）。' % spec_name, '']
 
     dst.write_text('\n'.join(out), encoding='utf-8')
     print('OK -> %s (%d 段)' % (dst, idx))

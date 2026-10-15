@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+
+# 注入验证的临时留档（★ 一律不许提交）
+*.orig
+*.orig.sha
+
+# 本项目私有的锚点配置（如果需要的话；正常情况用默认值即可）
+session-memory.config.json
