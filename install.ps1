@@ -91,8 +91,29 @@ foreach ($src in Get-ChildItem -LiteralPath $repoSkills -Directory) {
     try {
         if ($Copy) {
             if ($PSCmdlet.ShouldProcess($dst, '复制技能文件')) {
-                Copy-Item -LiteralPath $src.FullName -Destination $dst -Recurse -Force
-                Info '   已复制'
+                # ★ [10-15] 逐文件复制并**排除垃圾**（实测：整目录 Copy-Item 会把
+                #   scripts\__pycache__\*.pyc 一起拷进 DSH 技能目录）
+                New-Item -ItemType Directory -Path $dst -Force | Out-Null
+                $srcLen = $src.FullName.Length
+                $copied = 0
+                Get-ChildItem -LiteralPath $src.FullName -Recurse -Force -File |
+                    Where-Object {
+                        $_.FullName -notmatch '\\__pycache__\\' -and
+                        $_.Extension -ne '.pyc' -and
+                        $_.Name -notlike '*.orig' -and
+                        $_.Name -notlike '*.orig.sha'
+                    } |
+                    ForEach-Object {
+                        $rel = $_.FullName.Substring($srcLen).TrimStart('\')
+                        $target = Join-Path $dst $rel
+                        $parent = Split-Path $target -Parent
+                        if (-not (Test-Path -LiteralPath $parent)) {
+                            New-Item -ItemType Directory -Path $parent -Force | Out-Null
+                        }
+                        Copy-Item -LiteralPath $_.FullName -Destination $target -Force
+                        $copied++
+                    }
+                Info ("   已复制 {0} 个文件（★ 已排除 __pycache__ / *.pyc / *.orig*）" -f $copied)
             }
         } else {
             if ($PSCmdlet.ShouldProcess($dst, "新建联接 -> $($src.FullName)")) {

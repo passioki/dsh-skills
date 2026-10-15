@@ -121,6 +121,7 @@ git pull
 | **8** | ★★ **`install.ps1` 必须保留 UTF-8 BOM**（文件开头 `EF BB BF`）—— Windows PowerShell 5.1 读 `.ps1` 时**不认"无 BOM 的 UTF-8"**，会把中文按 GBK 解码 ⇒ 脚本**直接解析失败**（实测踩过：`复制` 变成 `澶嶅埗`）。★ 用 VS Code 编辑默认会保留 BOM；若你用过别的编辑器，`git diff` 里看一下 BOM 是否还在 |
 | **9** | ★ **执行策略**：本机 `CurrentUser = RemoteSigned`，实测直接 `.\install.ps1` 会报 **"not digitally signed"** ⇒ 用 **`install.bat`**（或 `-ExecutionPolicy Bypass`）。★ 不要为了这个去改全局执行策略 |
 | **10** | ★ 删除联接**只能**用 `cmd /c rmdir "<路径>"`。★ **不要**用 `Remove-Item -Recurse`：旧版 PowerShell 会顺着联接**删掉链接指向的真实内容**（`install.ps1` 里已经规避了这一点） |
+| **11** | ★ `install.ps1 -Copy` **逐文件复制并排除垃圾**：`__pycache__\` · `*.pyc` · `*.orig` / `*.orig.sha`（★ 实测：整目录 `Copy-Item` 会把 `scripts\__pycache__\*.pyc` 一起拷进 DSH 技能目录）|
 
 ---
 
