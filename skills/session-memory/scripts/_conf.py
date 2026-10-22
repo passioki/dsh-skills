@@ -17,6 +17,10 @@
   ledger    未完成台账名        默认 `PENDING-LEDGER.md`
   input     extract.py 导出的对话文本   默认 `_both.txt`
   tags      分类关键词表 JSON（★ 可完全覆盖内置表）  默认 空
+  resume    断点续接卡名        默认 `RESUME.md`（连续运行协议）
+  resume_index 断点索引名       默认 `RESUME-INDEX.md`
+  checkpoint_ops  无容量信号时每 N 次工具调用断点  默认 10
+  checkpoint_chars 无容量信号时新增工具输出字符阈值  默认 25000
 """
 import json
 import os
@@ -33,6 +37,10 @@ DEFAULT = {
     'ledger': 'PENDING-LEDGER.md',
     'input': '_both.txt',
     'tags': '',
+    'resume': 'RESUME.md',
+    'resume_index': 'RESUME-INDEX.md',
+    'checkpoint_ops': '10',
+    'checkpoint_chars': '25000',
 }
 
 
