@@ -19,12 +19,16 @@ dsh-skills\
 └── skills\
     └── session-memory\           ← 一个技能 = 一个目录
         ├── SKILL.md              ← ★ 必需：正文 + YAML 头部（name / description）
-        └── scripts\
-            ├── _conf.py          ← ★ 配置解析（默认值 = 历史默认 ⇒ 老项目零配置）
-            ├── extract.py        ← 从 DSH 会话 jsonl 导出双向纯文本
-            ├── seg.ps1           ← 取指定时间段的完整对话（★ 纯 ASCII）
-            ├── index_gen.py      ← 生成分类索引（★ 关键词表可 --tags 覆盖）
-            └── prog_gen.py       ← 生成覆盖台账
+        ├── scripts\
+        │   ├── _conf.py          ← ★ 配置解析（默认值 = 历史默认 ⇒ 老项目零配置）
+        │   ├── extract.py        ← 从 DSH 会话 jsonl 导出双向纯文本
+        │   ├── seg.ps1           ← 取指定时间段的完整对话（★ 纯 ASCII）
+        │   ├── index_gen.py      ← 生成分类索引（★ 关键词表可 --tags 覆盖）
+        │   └── prog_gen.py       ← 生成覆盖台账
+        └── templates\
+            ├── RESUME.template.md
+            ├── RESUME-INDEX.template.md
+            └── REQUIREMENTS-COVERAGE.template.md  ← ★ 强制 7 需求覆盖矩阵
 ```
 
 ★ 分支：本仓库只有 `main` 一个分支（技能仓库不需要"dev 开发 / main 稳定"那一套）。
